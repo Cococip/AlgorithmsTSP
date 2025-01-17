@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TSP dengan Algoritma Genetik</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        let map;
+        let markers = [];
+        let locations = [];
+
+        function initMap() {
+            map = L.map('map').setView([-7.250445, 112.768845], 7); // Koordinat awal (misalnya Surabaya)
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+
+            map.on('click', function(e) {
+                addMarker(e.latlng);
+            });
+
+            // Mendapatkan lokasi pengguna
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const userLocation = [position.coords.latitude, position.coords.longitude];
+                    L.marker(userLocation).addTo(map).bindPopup('Lokasi Anda').openPopup();
+                    map.setView(userLocation, 13);
+                });
+            }
+        }
+
+        function addMarker(location) {
+            const locationName = prompt("Masukkan nama lokasi:");
+            if (locationName) {
+                const marker = L.marker(location).addTo(map);
+                markers.push(marker);
+                locations.push({ name: locationName, coords: location.lat + ',' + location.lng });
+                updateLocationInput();
+            }
+        }
+
+        function updateLocationInput() {
+            const locationStrings = locations.map(loc => loc.coords);
+            document.getElementById("locations").value = locationStrings.join(',');
+        }
+    </script>
+</head>
+<body onload="initMap()">
+    <div class="container">
+        <h1>Traveling Salesman Problem (TSP)</h1>
+        <div id="map" style="height: 400px; margin-bottom: 20px;"></div>
+        <form action="tsp.php" method="post">
+            <input type="hidden" id="locations" name="locations" required>
+            <button type="submit">Hitung Rute Terbaik</button>
+        </form>
+    </div>
+</body>
+</html>
